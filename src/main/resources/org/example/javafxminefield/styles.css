@@ -1,0 +1,137 @@
+/* minefield-style.css */
+.root {
+    -fx-background-color: #f0f0f0;
+    -fx-font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+/* Top Section Styling */
+.combo-box {
+    -fx-background-color: white;
+    -fx-border-color: #d0d0d0;
+    -fx-border-radius: 4px;
+    -fx-padding: 5px;
+    -fx-font-size: 14px;
+}
+
+.combo-box .list-cell {
+    -fx-padding: 4px 8px;
+}
+
+.button {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 6px 12px;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #2980b9;
+}
+
+.check-box {
+    -fx-font-size: 14px;
+}
+
+.label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #2c3e50;
+}
+
+#lblTempo, #labelNumBombs {
+    -fx-font-weight: bold;
+    -fx-text-fill: #e74c3c;
+    -fx-font-size: 14px;
+}
+
+/* Grid Styling */
+.grid-pane {
+    -fx-background-color: #bdc3c7;
+    -fx-padding: 10px;
+    -fx-alignment: center;
+}
+
+/* Cell Styling */
+.button.cell {
+    -fx-background-color: #95a5a6;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-border-color: #7f8c8d;
+    -fx-border-width: 1px;
+    -fx-padding: 0;
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+    -fx-min-width: 40px;
+    -fx-min-height: 40px;
+    -fx-max-width: 40px;
+    -fx-max-height: 40px;
+    -fx-cursor: hand;
+}
+
+.button.cell:hover {
+    -fx-background-color: #7f8c8d;
+}
+
+/* Revealed cell styling */
+.button.cell-revealed {
+    -fx-background-color: #ecf0f1;
+    -fx-border-color: #bdc3c7;
+}
+
+/* Cell number colors */
+.button.cell-1 { -fx-text-fill: #3498db; } /* blue */
+.button.cell-2 { -fx-text-fill: #27ae60; } /* green */
+.button.cell-3 { -fx-text-fill: #e74c3c; } /* red */
+.button.cell-4 { -fx-text-fill: #8e44ad; } /* purple */
+.button.cell-5 { -fx-text-fill: #d35400; } /* orange */
+.button.cell-6 { -fx-text-fill: #16a085; } /* teal */
+.button.cell-7 { -fx-text-fill: #2c3e50; } /* dark blue */
+.button.cell-8 { -fx-text-fill: #7f8c8d; } /* gray */
+
+/* Bomb styling */
+.button.cell-bomb {
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+}
+
+/* Flag styling */
+.button.cell-flag {
+    -fx-background-color: #95a5a6;
+    -fx-text-fill: #e67e22;
+}
+
+/* Status label styling */
+#lblStatus {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+    -fx-padding: 10px;
+    -fx-alignment: center;
+}
+
+/* Game over effects */
+.game-over-win {
+    -fx-text-fill: #27ae60;
+}
+
+.game-over-lose {
+    -fx-text-fill: #e74c3c;
+}
+
+/* Media query for smaller screens */
+@media (max-width: 600px) {
+    .button {
+        -fx-padding: 4px 8px;
+        -fx-font-size: 12px;
+    }
+
+    .button.cell {
+        -fx-min-width: 30px;
+        -fx-min-height: 30px;
+        -fx-max-width: 30px;
+        -fx-max-height: 30px;
+        -fx-font-size: 14px;
+    }
+}

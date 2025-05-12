@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
+<BorderPane prefHeight="700" prefWidth="600"
+            style="-fx-padding: 20px;"
+            xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.12" fx:controller="org.example.javafxminefield.MineFieldController">
+
+    <top>
+        <HBox alignment="CENTER" spacing="20" style="-fx-padding: 10px;">
+            <ComboBox fx:id="comboBoxDifficulties" promptText="Dificuldade"/>
+            <Button fx:id="buttonNewGame" text="Novo Jogo" />
+            <CheckBox fx:id="chkBandeira" text="Modo Bandeira" />
+            <Label text="Tempo:" />
+            <Label fx:id="lblTempo" text="0s" />
+            <Label text="Bombas:" />
+            <Label fx:id="labelNumBombs"/>
+        </HBox>
+    </top>
+
+    <center>
+        <GridPane fx:id="grid" alignment="CENTER" style="-fx-hgap: 2px; -fx-vgap: 2px; -fx-padding: 10px;">
+         <columnConstraints>
+            <ColumnConstraints />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints />
+         </rowConstraints></GridPane>
+    </center>
+
+    <bottom>
+        <Label fx:id="lblStatus" alignment="CENTER" style="-fx-padding: 10px;" text="Bom jogo!" />
+    </bottom>
+</BorderPane>
