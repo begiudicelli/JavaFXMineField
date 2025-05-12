@@ -1,5 +1,9 @@
 package org.example.javafxminefield;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -7,29 +11,30 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
+import javafx.util.Duration;
 import org.example.javafxminefield.models.*;
-
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
 
 public class MineFieldController {
 
-    @FXML
-    private GridPane grid;
-    @FXML
-    private ComboBox<String> comboBoxDifficulties;
-    @FXML
-    private Button buttonNewGame;
-    @FXML
-    private Label labelNumBombs;
+    @FXML private GridPane grid;
+    @FXML private ComboBox<String> comboBoxDifficulties;
+    @FXML private Button buttonNewGame;
+    @FXML private Label labelNumBombs;
+    @FXML private Label labelTime;
+    @FXML private Label labelStatus;
+
+    private Timeline timer;
+    private final IntegerProperty seconds = new SimpleIntegerProperty(0);
+    private boolean firstClick = true;
 
     private Board board;
-    private final int numberOfAdjacentBombs = 1;
+    private final boolean flagMode = false;
+
 
     public void initialize() {
         loadDifficulties();
-        buttonNewGame.setOnAction(actionEvent -> startNewGame());
+        initializeTimer();
+        buttonNewGame.setOnAction(_ -> startNewGame());
     }
 
     private void loadDifficulties() {
@@ -45,63 +50,136 @@ public class MineFieldController {
         String selectedDifficulty = comboBoxDifficulties.getSelectionModel().getSelectedItem();
         Difficulties difficulty = Difficulties.valueOf(selectedDifficulty.toUpperCase());
         board = new Board(difficulty);
-        fillBoardWithBombs(board);
-        drawBoard();
+        createBoard();
     }
 
-    private void drawBoard(){
+    private void createBoard(){
+        setTimer();
         grid.getChildren().clear();
         String selectedDifficulty = comboBoxDifficulties.getSelectionModel().getSelectedItem();
         Difficulties difficulty = Difficulties.valueOf(selectedDifficulty.toUpperCase());
+        labelNumBombs.setText(String.valueOf(difficulty.numBombs));
 
-        int rows = difficulty.rows;
-        int cols = difficulty.cols;
-        int numBombs = difficulty.numBombs;
-        labelNumBombs.setText(String.valueOf(numBombs));
+        board = new Board(difficulty);
 
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                Button btn = new Button();
-                btn.getStyleClass().add("cell");
-                btn.setMinSize(40, 40);
+        for (int i = 0; i < board.getRows(); i++) {
+            for (int j = 0; j < board.getCols(); j++) {
+                Cell cell = board.getCell(i, j);
+                Button btn = getButton(cell);
 
-                int finalI = i;
-                int finalJ = j;
-                btn.setOnAction(e -> {
-                    //btn.getStyleClass().add("cell-revealed");
-                    //btn.getStyleClass().add("cell-" + numberOfAdjacentBombs);
-                    btn.setText("X");
-
-                    board.getCell(finalI, finalJ).setMarked(true);
-                    if(board.getCell(finalI, finalJ).hasBomb()) {
-                        System.out.println("EXPLODIU!");
-                    }
-                });
                 grid.add(btn, j, i);
+            }}
+    }
+
+    private Button getButton(Cell cell) {
+        Button btn = cell.getButton();
+
+        btn.setText("");
+        btn.setStyle("");
+
+        btn.setOnMouseClicked(e -> {
+            if (e.getButton() == javafx.scene.input.MouseButton.PRIMARY && !flagMode) {
+                revealCell(cell);
+            } else if (e.getButton() == javafx.scene.input.MouseButton.SECONDARY || e.getButton() == javafx.scene.input.MouseButton.PRIMARY) {
+                toggleFlag(cell);
+            }
+        });
+        return btn;
+    }
+
+    private void revealCell(Cell cell) {
+        if (firstClick && !cell.isFlagged()) {
+            firstClick = false;
+            timer.play();
+        }
+        if (cell.isRevealed() || cell.isFlagged() || board.isGameOver()) return;
+
+        cell.setRevealed(true);
+        Button btn = cell.getButton();
+
+        if (cell.isMine()) {
+            btn.setText("💣");
+            btn.setStyle("-fx-background-color: red;");
+            board.setGameOver(true);
+            revealAllMines();
+            timer.stop();
+            return;
+        }
+
+        if (cell.getAdjacentMines() > 0) {
+            btn.setText(String.valueOf(cell.getAdjacentMines()));
+        } else {
+            revealAdjacentCells(cell.getRow(), cell.getCol());
+        }
+
+        btn.setStyle("-fx-background-color: lightgray;");
+
+        if (checkWinCondition()) {
+            timer.stop();
+        }
+    }
+
+    private void revealAdjacentCells(int x, int y) {
+        for (int i = Math.max(0, x-1); i <= Math.min(board.getRows()-1, x+1); i++) {
+            for (int j = Math.max(0, y-1); j <= Math.min(board.getCols()-1, y+1); j++) {
+                if (i == x && j == y) continue;
+                revealCell(board.getCell(i, j));
             }
         }
     }
 
-    private void fillBoardWithBombs(Board board) {
-        int rows = board.getRows();
-        int cols = board.getCols();
-        int numBombs = board.getNumBombs();
-        Cell[][] cells = board.getCells();
+    private void toggleFlag(Cell cell) {
+        if (cell.isRevealed() || board.isGameOver()) return;
+        cell.setFlagged(!cell.isFlagged());
+        Button btn = cell.getButton();
+        if (cell.isFlagged())btn.setText("🚩");
+        else btn.setText("");
+    }
 
-        Random rand = new Random();
-        Set<String> bombPositions = new HashSet<>();
-
-        while (bombPositions.size() < numBombs) {
-            int r = rand.nextInt(rows);
-            int c = rand.nextInt(cols);
-            String pos = r + "," + c;
-
-            if (!bombPositions.contains(pos)) {
-                bombPositions.add(pos);
-                cells[r][c].setHasBomb(true);
+    private void revealAllMines() {
+        for (int i = 0; i < board.getRows(); i++) {
+            for (int j = 0; j < board.getCols(); j++) {
+                Cell cell = board.getCell(i, j);
+                if (cell.isMine()) {
+                    cell.getButton().setText("💣");
+                }
             }
         }
     }
 
+    private boolean checkWinCondition() {
+        int unrevealedSafeCells = 0;
+
+        for (int i = 0; i < board.getRows(); i++) {
+            for (int j = 0; j < board.getCols(); j++) {
+                Cell cell = board.getCell(i, j);
+                if (!cell.isMine() && !cell.isRevealed()) {
+                    unrevealedSafeCells++;
+                }
+            }
+        }
+
+        if (unrevealedSafeCells == 0) {
+            board.setGameOver(true);
+            labelStatus.setText("You Win!");
+            return true;
+        }
+        return false;
+    }
+
+    private void initializeTimer(){
+        timer = new Timeline(new KeyFrame(Duration.seconds(1), _ -> seconds.set(seconds.get() + 1)));
+        timer.setCycleCount(Timeline.INDEFINITE);
+
+        labelTime.textProperty().bind(seconds.asString("%ds"));
+    }
+
+    private void setTimer(){
+        timer.stop();
+        seconds.set(0);
+        firstClick = true;
+        grid.getChildren().clear();
+        labelStatus.setText("Bom jogo!");
+    }
 
 }
